@@ -1,0 +1,77 @@
+РЕШЕНИЕ:
+
+Иду по порядку кода и анализурую его: 
+    Импортируются библиотеки, первая помогает изменять только первую часть некой пары, вторая работает с символами(насколько понимаю преобразует целое число в символ)
+main = putStrLn answer # выводит answer-строку
+answer = zipWith foo bar numbers # сам ответ, который выведется после некоторых махинаций(поняла: берутся элементы из bar и numbers и преобразуются при помощи foo)
+foo = curry $ chr . uncurry (-) . first ((`mod` 1021) . e) # e - длина списка получается, берется модуль 1021, минусуем число из numbers, chr переводит число в Unicode
+bar = c1 : c2 : zipWith f bar (tail bar) # изначально заданы c2 и с1 и на основе этих значений используется функция f чтобы получить значения i-го bar, то есть  bar[i]  это то же самое что и f(bar[i-2], bar[i-1])
+
+f :: Eq a => [a] -> [a] -> [a]
+f x y#'c' это функция сравнение, которая описана ниже в коде которая сравнивает длины, то есть 
+  | d1 c a x y = sb x y # d1 => x + y, если выполняется это условие выполняем sb x y(вычитаем, т.е x - y)
+  | a x y c d2 = a x y # x + y  => d2, если выполняется это условие выполняем a x y (x + y) 
+  | otherwise = f x $ m x y #иначе 
+
+z :: [a]# создается пустой список
+z = []
+
+s :: [()] -> [()]# возвращает тот же список но с добавлением элемента в начало(То есть удлиняет список на один)
+s x = () : x
+
+a :: Eq a => [a] -> [a] -> [a]# функция которая складывает списки
+a x y | x == z = y
+a (x : xs) y = a xs (x : y)
+
+sb :: Eq a => [b] -> [a] -> [b]#функция которая вычитает списки 
+sb x y | y == z = x
+sb (_ : xs) (_ : ys) = sb xs ys
+
+m :: (Eq a, Eq b) => [b] -> [a] -> [b]#функция которая перемножает 
+m x y | y == z = z
+m x (y : ys) = a x $ m x ys
+
+c :: (Eq a, Eq b) => [b] -> [a] -> Bool#а эта функция сравнения длины списка 
+c _ y | y == z = True
+c x _ | x == z = False
+c (_ : xs) (y : ys) = c xs ys
+
+e :: (Eq a, Num p) => [a] -> p#определяет длину списка(выводит 0 если список пустой)
+e x | x == z = 0
+e (_ : xs) = (1 +) $ e xs
+
+перепишем на питон:
+def a(x, y):   return x + y
+def sb(x, y):  return x - y
+def m(x, y):   return x * y
+def c(x, y):   return x >= y
+
+def f(x, y):
+    if c(d1_l, a(x, y)):
+        return sb(x, y)
+    elif c(a(x, y), d2_l):
+        return a(x, y)
+    else:
+        return f(x, m(x, y))
+
+bar = [c1_l, c2_l]
+for i in range(2, len(numbers)):
+    bar.append(f(bar[i-2], bar[i-1]))
+
+answer = ""
+for i in range(len(numbers)):
+    char_value = (bar[i] % 1021) - numbers[i]
+    answer += chr(char_value)
+
+
+print('\n')
+print("Answer: ",answer)
+print('\n')
+
+в качестве c1_l и d1_l записываем количество s в исходном коде( c1_l = 233, c2_l = 666,d1_l = 512,d2_l = 800)
+
+Запустив программу получаем: PPPSD{haskell4life_p34n0_numbers_as_lists4w1n_e160d0248b93cdb092_1!1}
+
+
+ОТВЕТ: 
+PPPSD{haskell4life_p34n0_numbers_as_lists4w1n_e160d0248b93cdb092_1!1}
